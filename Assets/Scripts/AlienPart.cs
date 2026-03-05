@@ -4,6 +4,7 @@ using UnityEngine;
 public class AlienPart : ScriptableObject
 {
     public string partName;
+    public AlienBodyPart bodyPart;
     public int amount;
     
 

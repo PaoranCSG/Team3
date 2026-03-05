@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Collections;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,9 +13,14 @@ public class PlayerController : MonoBehaviour
     public List<CameraPosition> cameraHistory = new List<CameraPosition>();
     public MoveEffect nod;
     public MoveEffect shakeHead;
+    public List<bool> blinks = new List<bool>();
+    public GameObject blinkFilter;
+    public Button blinkButton;
+    public TMP_Text morseText;
 
     private void Start()
     {
+        blinkButton.onClick.AddListener(() => Blink());
         currentPosition = CameraPosition.middle;
         foreach (Button button in moveButtons)
         {
@@ -21,9 +28,88 @@ public class PlayerController : MonoBehaviour
             button.onClick.AddListener(() => PressedButton(i));
             button.enabled = true;
         }
+        
 
     }
-    
+    public bool isLongMorse;
+    delegate void BlinkTimerDelegate();
+    public void Blink()
+    {
+        
+        blinkFilter.SetActive(!blinkFilter.activeSelf);
+        if (blinkFilter.activeSelf)
+        {
+            isLongMorse = false;
+            StartCoroutine(BlinkTimer());
+        }
+        else
+        {
+            
+            blinks.Add(isLongMorse);
+            StopAllCoroutines();
+            MorseCodeCheck();
+            if (blinks.Count > 4)
+            {
+                blinks.Clear();
+            }
+
+        }
+        
+    }
+    public void MorseCodeCheck()
+    {
+
+        
+        bool acceptedResult = false;
+        foreach (MorseLetter letter in MorseCode.instance.morseLetters)
+        {
+            int check = 0;
+            for (int i = 0; i < letter.morseList.Count; i++)
+            {
+                
+                if (letter.morseList.Count != blinks.Count)
+                {
+                    
+                    break;
+                }
+                
+                if (letter.morseList[i] == blinks[i])
+                {
+                    check++;
+                    /*Debug.Log("MorseList " +letter.morseList[i]);
+                    Debug.Log("blinkValue"+blinks[i]);
+                    Debug.Log("CheckCount for Letter "+letter.letter+ " : " + check);
+                    Debug.Log(blinks.Count);*/
+                    if (check == blinks.Count)
+                    {
+                        acceptedResult = true;
+                        morseText.text = letter.letter;
+                           
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+                
+                
+            }
+           
+        }
+        if (!acceptedResult)
+        {
+            morseText.text = "Not found";
+        }
+        
+        
+        
+    }
+    public IEnumerator BlinkTimer()
+    {
+        yield return new WaitForSeconds(1);
+        isLongMorse = true;
+    }
     public void PressedButton(int index)
     {
         
@@ -128,7 +214,9 @@ public class PlayerController : MonoBehaviour
     }
     public void CheckMovement(MoveEffect effect,int depth)
     {
+        
         List<CameraPosition> cameraPos = new List<CameraPosition>();
+        cameraPos.Clear();
         for (int i = 0; i < cameraHistory.Count; i++)
         {
             cameraPos.Add(cameraHistory[i]);
@@ -139,8 +227,8 @@ public class PlayerController : MonoBehaviour
             int check = 0;
             foreach (CameraPosition cameraPosition in moveEffect.movePositions)
             {
-                Debug.Log(cameraPos.Count);
-                Debug.Log(i);
+                //Debug.Log(cameraPos.Count);
+                //Debug.Log(i);
                 if (cameraPosition == cameraPos[i])
                 {
                     check++;
@@ -175,4 +263,5 @@ public class CameraMove
 {
     public List<CameraPosition> movePositions = new List<CameraPosition>();
 }
+
 
