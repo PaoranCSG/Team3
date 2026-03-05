@@ -8,6 +8,9 @@ public class PlayerController : MonoBehaviour
     private List<Transform> CameraPositions = new List<Transform>();
     public CameraPosition currentPosition;
     public List<Button> moveButtons = new List<Button>();
+    public List<CameraPosition> cameraHistory = new List<CameraPosition>();
+    public MoveEffect nod;
+    public MoveEffect shakeHead;
 
     private void Start()
     {
@@ -63,7 +66,12 @@ public class PlayerController : MonoBehaviour
                 Camera.main.transform.position = CameraPositions[4].position;
 
             }
-           
+            cameraHistory.Add(currentPosition);
+            if (cameraHistory.Count > 3)
+            {
+                cameraHistory.RemoveAt(0);
+            }
+            CheckCameraHistory();
             return;
             
         }
@@ -75,14 +83,96 @@ public class PlayerController : MonoBehaviour
             button.image.color = Color.white;
             button.enabled = true;
         }
-
+        cameraHistory.Add(currentPosition);
+        if(cameraHistory.Count > 3)
+        {
+            cameraHistory.RemoveAt(0);
+        }
+        CheckCameraHistory();
+        
     }
-    
+    public void CheckCameraHistory()
+    {
+        int depth = 3;
+        if(cameraHistory.Count < depth)
+        {
+            Debug.Log("Not enought camera History");
+            return;
+        }
+
+        CheckMovement(nod, 3);
+        CheckMovement(shakeHead, 3);
+        /*foreach(CameraMove moveEffect in nod.cameraMoves)
+        {
+            int i = 0;
+            int check= 0;
+            foreach (CameraPosition cameraPosition in moveEffect.movePositions)
+            {
+                Debug.Log(cameraPos.Count);
+                Debug.Log(i);
+                if (cameraPosition == cameraPos[i])
+                {
+                    check++;
+                }
+                else
+                {
+                    break;
+                }
+                if(check == depth)
+                {
+                    Debug.Log("Nodding detected");
+                }
+                    i++;
+            }
+        }*/
+    }
+    public void CheckMovement(MoveEffect effect,int depth)
+    {
+        List<CameraPosition> cameraPos = new List<CameraPosition>();
+        for (int i = 0; i < cameraHistory.Count; i++)
+        {
+            cameraPos.Add(cameraHistory[i]);
+        }
+        foreach (CameraMove moveEffect in effect.cameraMoves)
+        {
+            int i = 0;
+            int check = 0;
+            foreach (CameraPosition cameraPosition in moveEffect.movePositions)
+            {
+                Debug.Log(cameraPos.Count);
+                Debug.Log(i);
+                if (cameraPosition == cameraPos[i])
+                {
+                    check++;
+                }
+                else
+                {
+                    break;
+                }
+                if (check == depth)
+                {
+                    Debug.Log(effect.moveName);
+                }
+                i++;
+            }
+        }
+    }
 
     
 }
 public enum CameraPosition
 {
     left, right, up, down, middle
+}
+[System.Serializable]
+public class MoveEffect
+{
+    public List<CameraMove> cameraMoves = new List<CameraMove>();
+    public string moveName;
+}
+[System.Serializable]
+public class CameraMove
+{
+    public List<CameraPosition> movePositions = new List<CameraPosition>();
 }
 
