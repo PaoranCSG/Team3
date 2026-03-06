@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     public Button blinkButton;
     public Button wiggleButton;
     public Button jumpButton;
+    public Button xrayButton;
     public TMP_Text morseText;
     public Rigidbody rigidBody;
     public string targetMorseLetter;
@@ -28,6 +29,10 @@ public class PlayerController : MonoBehaviour
     public bool canJump = true;
     public Combination task1Combination;
     public List<CompletedAction> completedActions = new List<CompletedAction>();
+    public Animator alienAnimator;
+    public bool xrayOn;
+    public bool secondPose;
+    
 
     private void Start()
     {
@@ -35,6 +40,7 @@ public class PlayerController : MonoBehaviour
         blinkButton.onClick.AddListener(() => Blink());
         wiggleButton.onClick.AddListener(() => SubmitWiggle());
         jumpButton.onClick.AddListener(() => Jump());
+        xrayButton.onClick.AddListener(() => Xray());
         currentPosition = CameraPosition.middle;
         foreach (Button button in moveButtons)
         {
@@ -45,8 +51,25 @@ public class PlayerController : MonoBehaviour
 
 
     }
+    public void ChangePosition() 
+    {
+        alienAnimator.SetTrigger("Reaction");
+    }
     public bool isLongMorse;
     delegate void BlinkTimerDelegate();
+    public void Xray()
+    {
+        if (xrayOn)
+        {
+            xrayOn = false;
+            alienAnimator.SetTrigger("XRay");
+        }
+        else
+        {
+            xrayOn = true;
+            alienAnimator.SetTrigger("XRay");
+        }
+    }
     public void Blink()
     {
 
@@ -69,6 +92,35 @@ public class PlayerController : MonoBehaviour
 
         }
 
+    }
+    public void CheckCombination()
+    {
+        int check = 0;
+        foreach (CompletedAction completedAction in task1Combination.completedActions)
+        {
+                foreach (CompletedAction action in completedActions)
+                {
+
+                    if (action == completedAction)
+                    {
+                        check++;
+                        if (check >= 3)
+                        {
+                            ChangePosition();
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+        }
+        if(completedActions.Count >= 3)
+        {
+            completedActions.Clear();
+        }
+        
     }
     public void Jump()
     {
@@ -102,6 +154,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Wrong morse letter!");
         }
+        CheckCombination();
     }
     public void MorseCodeCheck()
     {
@@ -183,6 +236,7 @@ public class PlayerController : MonoBehaviour
                 moveButtons[3].image.color = Color.white;
                 currentPosition = CameraPosition.down;
                 gameScreen.transform.Rotate(new Vector3(-8, 0, 0));
+                Camera.main.transform.Rotate(new Vector3(10, 0, 0));
                 //Camera.main.transform.position = CameraPositions[2].position;
             }
             else if (index == 2)
@@ -199,8 +253,10 @@ public class PlayerController : MonoBehaviour
                 moveButtons[1].enabled = true;
                 moveButtons[1].image.color = Color.white;
                 currentPosition = CameraPosition.up;
-                gameScreen.transform.Rotate(new Vector3(10, 0, 0));
-                //Camera.main.transform.position = CameraPositions[4].position;
+                gameScreen.transform.Rotate(new Vector3(16, 0, 0));
+                Camera.main.transform.Rotate(new Vector3(-10, 0, 0));
+                Camera.main.transform.localPosition = new Vector3(Camera.main.transform.localPosition.x, 2f, Camera.main.transform.localPosition.z);
+
 
             }
             cameraHistory.Add(currentPosition);
@@ -215,10 +271,14 @@ public class PlayerController : MonoBehaviour
         if (currentPosition == CameraPosition.down) 
         {
             gameScreen.transform.Rotate(new Vector3(8, 0, 0));
+            Camera.main.transform.Rotate(new Vector3(-10, 0, 0));
         }
         else if  (currentPosition == CameraPosition.up)
         {
-            gameScreen.transform.Rotate(new Vector3(-10, 0, 0));
+            gameScreen.transform.Rotate(new Vector3(-16, 0, 0));
+            Camera.main.transform.Rotate(new Vector3(10, 0, 0));
+            Camera.main.transform.localPosition = new Vector3(Camera.main.transform.localPosition.x, 0.45f, Camera.main.transform.localPosition.z);
+
         }
         else if (currentPosition == CameraPosition.left)
         {
@@ -227,6 +287,7 @@ public class PlayerController : MonoBehaviour
         else if (currentPosition == CameraPosition.right)
         {
             Camera.main.transform.Rotate(new Vector3(0, -25, 0));
+
         }
         currentPosition = CameraPosition.middle;
         //Camera.main.transform.position = CameraPositions[0].position;
@@ -278,10 +339,7 @@ public class PlayerController : MonoBehaviour
             }
         }*/
     }
-    public void CheckCombination()
-    {
-
-    }
+    
     public void CheckMovement(MoveEffect effect,int depth)
     {
         
