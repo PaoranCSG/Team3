@@ -3,10 +3,15 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
+    public static GameController instance;
     public Image timerFill;
     public float maxTime = 100;
     public float timer;
 
+    private void Awake()
+    {
+        if(instance == null) {  instance = this; }
+    }
     private void Start()
     {
         timer = maxTime;   

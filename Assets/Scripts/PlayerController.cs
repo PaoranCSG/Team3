@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     public Animator alienAnimator;
     public bool xrayOn;
     public bool secondPose;
+    public TMP_Text beatGameText;
     
 
     private void Start()
@@ -54,6 +55,8 @@ public class PlayerController : MonoBehaviour
     public void ChangePosition() 
     {
         alienAnimator.SetTrigger("Reaction");
+        GameController.instance.timer = GameController.instance.maxTime;
+        secondPose = true;
     }
     public bool isLongMorse;
     delegate void BlinkTimerDelegate();
@@ -95,6 +98,10 @@ public class PlayerController : MonoBehaviour
     }
     public void CheckCombination()
     {
+        if (secondPose)
+        {
+            return;
+        }
         int check = 0;
         foreach (CompletedAction completedAction in task1Combination.completedActions)
         {
@@ -149,6 +156,7 @@ public class PlayerController : MonoBehaviour
         if(morseText.text == targetMorseLetter)
         {
             Debug.Log("Correct morse Letter!");
+            beatGameText.gameObject.SetActive(true);
         }
         else
         {
