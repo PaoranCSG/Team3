@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 using System.Runtime.Serialization.Formatters;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -62,6 +63,8 @@ public class PlayerController : MonoBehaviour
     delegate void BlinkTimerDelegate();
     public void Xray()
     {
+
+        ClearBlinks();
         if (xrayOn)
         {
             xrayOn = false;
@@ -72,6 +75,11 @@ public class PlayerController : MonoBehaviour
             xrayOn = true;
             alienAnimator.SetTrigger("XRay");
         }
+    }
+    public void ClearBlinks()
+    {
+        blinks.Clear();
+        morseText.text = "";
     }
     public void Blink()
     {
@@ -102,27 +110,28 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+        
         int check = 0;
-        foreach (CompletedAction completedAction in task1Combination.completedActions)
+        if (completedActions.Count == 3)
         {
-                foreach (CompletedAction action in completedActions)
+            for (int i = 0; i < completedActions.Count; i++)
+            {
+                if (task1Combination.completedActions[i] == completedActions[i])
                 {
+                    check++;
 
-                    if (action == completedAction)
+                    if (check >= 3)
                     {
-                        check++;
-                        if (check >= 3)
-                        {
-                            ChangePosition();
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        
+                        ChangePosition();
+                        return;
                     }
                 }
+            }
         }
+                
+                
+                
+        
         if(completedActions.Count >= 3)
         {
             completedActions.Clear();
@@ -131,6 +140,7 @@ public class PlayerController : MonoBehaviour
     }
     public void Jump()
     {
+        ClearBlinks();
         if (canJump)
         {
             rigidBody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
@@ -152,6 +162,7 @@ public class PlayerController : MonoBehaviour
     }
     public void SubmitWiggle()
     {
+        
         completedActions.Add(CompletedAction.wiggle);
         if(morseText.text == targetMorseLetter)
         {
